@@ -1,0 +1,155 @@
+// generator va datasource
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  LIBRARIAN
+  ACCOUNTANT
+  READER
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum CopyStatus {
+  AVAILABLE
+  RESERVED
+  BORROWED
+  LOST
+  DAMAGED
+}
+
+enum BorrowStatus {
+  BORROWED
+  RETURNED
+}
+
+enum ReservationStatus {
+  ACTIVE
+  NOTIFIED
+  FULFILLED
+  CANCELLED
+  EXPIRED
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique @db.VarChar(120)
+  passwordHash String   @db.VarChar(255)
+  name         String   @db.VarChar(120)
+  role         Role     @default(READER)
+  phone        String?  @db.VarChar(20)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  readerProfile     ReaderProfile?
+  handledBorrowings Borrowing[]    @relation("StaffBorrowings")
+
+  @@index([role])
+}
+
+model ReaderProfile {
+  id               Int      @id @default(autoincrement())
+  userId           Int      @unique
+  address          String   @db.VarChar(255)
+  gender           Gender   @default(FEMALE)
+  registrationDate DateTime @default(now())
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  borrowings   Borrowing[]   @relation("ReaderBorrowings")
+  reservations Reservation[]
+}
+
+model Book {
+  id            Int      @id @default(autoincrement())
+  title         String   @db.VarChar(255)
+  author        String   @db.VarChar(255)
+  genre         String   @db.VarChar(100)
+  language      String?  @db.VarChar(30)
+  publishedYear Int
+  description   String?
+  location      String   @db.VarChar(50)
+  coverUrl      String?  @db.VarChar(255)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  copies       BookCopy[]
+  borrowings   Borrowing[]
+  reservations Reservation[]
+
+  @@unique([title, author, publishedYear])
+  @@index([title, author, genre])
+}
+
+model BookCopy {
+  id        Int        @id @default(autoincrement())
+  bookId    Int
+  status    CopyStatus @default(AVAILABLE)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  book         Book          @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  borrowings   Borrowing[]
+  reservations Reservation[]
+
+  @@index([bookId, status])
+}
+
+model Borrowing {
+  id         Int          @id @default(autoincrement())
+  readerId   Int
+  copyId     Int
+  staffId    Int?
+  borrowDate DateTime     @default(now())
+  dueDate    DateTime
+  returnDate DateTime?
+  status     BorrowStatus @default(BORROWED)
+
+  reader ReaderProfile @relation("ReaderBorrowings", fields: [readerId], references: [id])
+  copy   BookCopy      @relation(fields: [copyId], references: [id])
+  staff  User?         @relation("StaffBorrowings", fields: [staffId], references: [id])
+  fines  Fine[]
+  book   Book?         @relation(fields: [bookId], references: [id])
+  bookId Int?
+
+  @@index([readerId, copyId])
+  @@index([dueDate])
+}
+
+model Reservation {
+  id         Int               @id @default(autoincrement())
+  readerId   Int
+  bookId     Int
+  reservedAt DateTime          @default(now())
+  expiresAt  DateTime?
+  status     ReservationStatus @default(ACTIVE)
+  reader     ReaderProfile     @relation(fields: [readerId], references: [id])
+  book       Book              @relation(fields: [bookId], references: [id])
+  bookCopy   BookCopy?         @relation(fields: [bookCopyId], references: [id])
+  bookCopyId Int?
+
+  @@index([readerId, bookId, status])
+}
+
+model Fine {
+  id          Int       @id @default(autoincrement())
+  borrowingId Int
+  reason      String    @db.VarChar(255)
+  amount      Decimal   @db.Decimal(10, 2)
+  fineDate    DateTime  @default(now())
+  paidAt      DateTime?
+
+  borrowing Borrowing @relation(fields: [borrowingId], references: [id])
+
+  @@index([borrowingId])
+}
