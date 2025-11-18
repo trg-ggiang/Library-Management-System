@@ -56,7 +56,7 @@ export default function Dashboard() {
       try {
         setLoading(true);
         setError("");
-        const res = await api.get("/dashboard/admin-overview");
+        const res = await api.get("/admin/dashboard");
         setStats(res.data);
       } catch (err) {
         console.error("Failed to load admin dashboard", err);

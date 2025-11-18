@@ -14,16 +14,6 @@ function randomDate(start, end) {
 }
 
 async function main() {
-  console.log("=== RESET DATABASE ===");
-
-  await prisma.fine.deleteMany();
-  await prisma.reservation.deleteMany();
-  await prisma.borrowing.deleteMany();
-  await prisma.bookCopy.deleteMany();
-  await prisma.book.deleteMany();
-  await prisma.readerProfile.deleteMany();
-  await prisma.user.deleteMany();
-
   console.log("=== SEED USERS ===");
 
   // ---- ADMIN ----

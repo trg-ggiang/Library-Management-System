@@ -6,10 +6,9 @@ import Dashboard from "./pages/ADMIN/Dashboard.jsx";
 import ReaderDashboard from "./pages/READER/ReaderDashboard.jsx"; 
 
 import useAuthStore from "./store/useAuthStore.js"; 
-import AdminBorrowHistory from "./pages/ADMIN/AdminBorrowHistory.jsx";
 import AdminBrowseBooks from "./pages/ADMIN/AdminBrowseBooks.jsx";
-import AdminScheduleBorrow from "./pages/ADMIN/AdminScheduleBorrow.jsx";
 import AdminUsers from "./pages/ADMIN/AdminUsers.jsx";
+import AdminStatistics from "./pages/ADMIN/AdminStatistics";
 
 
 function ProtectedRoute({ children, allowRoles }) {
@@ -47,9 +46,8 @@ export default function App() {
         <Route path="/admin/dashboard" element={<Dashboard />} />
         <Route path="/reader/dashboard" element={<ReaderDashboard />} />
         <Route path="/admin/books" element={<AdminBrowseBooks />} />
-        <Route path="/admin/borrow-history" element={<AdminBorrowHistory />} />
-        <Route path="/admin/schedule-borrow" element={<AdminScheduleBorrow />} />
         <Route path="/admin/users" element={<AdminUsers />} />
+        <Route path="/admin/statistics" element={<AdminStatistics />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>

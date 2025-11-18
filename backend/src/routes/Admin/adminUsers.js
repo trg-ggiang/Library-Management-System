@@ -5,7 +5,6 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 const router = express.Router();
 
-
 function sanitizeUser(user) {
   if (!user) return user;
   const { passwordHash, ...safe } = user;
@@ -14,37 +13,38 @@ function sanitizeUser(user) {
 
 router.get("/users", async (req, res) => {
   try {
-    const users = await prisma.user.findMany({
-      where: {
-        NOT: { role: "ADMIN" },
-      },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        phone: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-      orderBy: { createdAt: "desc" },
-    });
+    const rows = await prisma.$queryRaw`
+      SELECT
+        id,
+        email,
+        name,
+        role,
+        phone,
+        "createdAt",
+        "updatedAt"
+      FROM "User"
+      WHERE role <> 'ADMIN'
+      ORDER BY "createdAt" DESC
+    `;
 
-    res.json(users);
+    res.json(rows);
   } catch (err) {
     console.error("Error get users:", err);
     res.status(500).json({ message: "Failed to fetch users" });
   }
 });
 
-
 router.get("/users/:id", async (req, res) => {
   try {
     const id = Number(req.params.id);
 
-    const user = await prisma.user.findUnique({
-      where: { id },
-    });
+    const rows = await prisma.$queryRaw`
+      SELECT *
+      FROM "User"
+      WHERE id = ${id}
+      LIMIT 1
+    `;
+    const user = rows[0];
 
     if (!user || user.role === "ADMIN") {
       return res.status(404).json({ message: "User not found" });
@@ -57,7 +57,6 @@ router.get("/users/:id", async (req, res) => {
   }
 });
 
-
 router.post("/users", async (req, res) => {
   try {
     const { name, email, password, role, phone } = req.body;
@@ -69,51 +68,75 @@ router.post("/users", async (req, res) => {
       });
     }
 
-    const existing = await prisma.user.findUnique({
-      where: { email: email.trim().toLowerCase() },
-    });
-    if (existing) {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const existingRows = await prisma.$queryRaw`
+      SELECT id
+      FROM "User"
+      WHERE email = ${normalizedEmail}
+      LIMIT 1
+    `;
+    if (existingRows.length > 0) {
       return res.status(409).json({ message: "Email already in use" });
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email: email.trim().toLowerCase(),
-        passwordHash,
-        role,
-        phone,
-      },
-    });
+    try {
+      const insertedRows = await prisma.$queryRaw`
+        INSERT INTO "User"
+          (name, email, "passwordHash", role, phone)
+        VALUES
+          (${name}, ${normalizedEmail}, ${passwordHash}, ${role}, ${phone})
+        RETURNING id, email, name, role, phone, "createdAt", "updatedAt"
+      `;
+      const user = insertedRows[0];
 
-    res.status(201).json(sanitizeUser(user));
+      res.status(201).json(user);
+    } catch (err) {
+      console.error("Error create user:", err);
+      if (err.code === "23505") {
+        return res.status(409).json({ message: "Email already in use" });
+      }
+      res.status(500).json({ message: "Failed to create user" });
+    }
   } catch (err) {
     console.error("Error create user:", err);
     res.status(500).json({ message: "Failed to create user" });
   }
 });
 
-
 router.put("/users/:id", async (req, res) => {
   try {
     const id = Number(req.params.id);
     const { name, email, phone, role } = req.body;
 
-    const user = await prisma.user.findUnique({ where: { id } });
+    const userRows = await prisma.$queryRaw`
+      SELECT *
+      FROM "User"
+      WHERE id = ${id}
+      LIMIT 1
+    `;
+    const user = userRows[0];
+
     if (!user || user.role === "ADMIN") {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const updateData = {};
-
-    if (typeof name === "string") updateData.name = name;
-    if (typeof phone === "string") updateData.phone = phone;
-    if (typeof email === "string") {
-      updateData.email = email.trim().toLowerCase();
+    const updates = [];
+    const params = [];
+    if (typeof name === "string") {
+      updates.push(`name = $${updates.length + 1}`);
+      params.push(name);
     }
-
+    if (typeof phone === "string") {
+      updates.push(`phone = $${updates.length + 1}`);
+      params.push(phone);
+    }
+    if (typeof email === "string") {
+      updates.push(`email = $${updates.length + 1}`);
+      params.push(email.trim().toLowerCase());
+    }
     if (role) {
       const allowedRoles = ["LIBRARIAN", "ACCOUNTANT", "READER"];
       if (!allowedRoles.includes(role)) {
@@ -121,20 +144,35 @@ router.put("/users/:id", async (req, res) => {
           message: "Invalid role. Allowed: LIBRARIAN, ACCOUNTANT, READER",
         });
       }
-      updateData.role = role;
+      updates.push(`role = $${updates.length + 1}`);
+      params.push(role);
     }
 
-    const updated = await prisma.user.update({
-      where: { id },
-      data: updateData,
-    });
+    if (updates.length === 0) {
+      return res.json(sanitizeUser(user));
+    }
 
-    res.json(sanitizeUser(updated));
+    params.push(id);
+    const sql = `
+      UPDATE "User"
+      SET ${updates.join(", ")}
+      WHERE id = $${params.length}
+      RETURNING *
+    `;
+
+    try {
+      const updatedRows = await prisma.$queryRawUnsafe(sql, ...params);
+      const updated = updatedRows[0];
+      res.json(sanitizeUser(updated));
+    } catch (err) {
+      console.error("Error update user:", err);
+      if (err.code === "23505") {
+        return res.status(409).json({ message: "Email already in use" });
+      }
+      res.status(500).json({ message: "Failed to update user" });
+    }
   } catch (err) {
     console.error("Error update user:", err);
-    if (err.code === "P2002") {
-      return res.status(409).json({ message: "Email already in use" });
-    }
     res.status(500).json({ message: "Failed to update user" });
   }
 });
@@ -148,28 +186,41 @@ router.patch("/users/:id/email", async (req, res) => {
       return res.status(400).json({ message: "newEmail is required" });
     }
 
-    const user = await prisma.user.findUnique({ where: { id } });
+    const userRows = await prisma.$queryRaw`
+      SELECT *
+      FROM "User"
+      WHERE id = ${id}
+      LIMIT 1
+    `;
+    const user = userRows[0];
+
     if (!user || user.role === "ADMIN") {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const updated = await prisma.user.update({
-      where: { id },
-      data: {
-        email: newEmail.trim().toLowerCase(),
-      },
-    });
+    const normalizedEmail = newEmail.trim().toLowerCase();
 
-    res.json(sanitizeUser(updated));
+    try {
+      const updatedRows = await prisma.$queryRaw`
+        UPDATE "User"
+        SET email = ${normalizedEmail}
+        WHERE id = ${id}
+        RETURNING *
+      `;
+      const updated = updatedRows[0];
+      res.json(sanitizeUser(updated));
+    } catch (err) {
+      console.error("Error change email:", err);
+      if (err.code === "23505") {
+        return res.status(409).json({ message: "Email already in use" });
+      }
+      res.status(500).json({ message: "Failed to change email" });
+    }
   } catch (err) {
     console.error("Error change email:", err);
-    if (err.code === "P2002") {
-      return res.status(409).json({ message: "Email already in use" });
-    }
     res.status(500).json({ message: "Failed to change email" });
   }
 });
-
 
 router.patch("/users/:id/password", async (req, res) => {
   try {
@@ -180,17 +231,25 @@ router.patch("/users/:id/password", async (req, res) => {
       return res.status(400).json({ message: "newPassword is required" });
     }
 
-    const user = await prisma.user.findUnique({ where: { id } });
+    const userRows = await prisma.$queryRaw`
+      SELECT *
+      FROM "User"
+      WHERE id = ${id}
+      LIMIT 1
+    `;
+    const user = userRows[0];
+
     if (!user || user.role === "ADMIN") {
       return res.status(404).json({ message: "User not found" });
     }
 
     const passwordHash = await bcrypt.hash(newPassword, 10);
 
-    await prisma.user.update({
-      where: { id },
-      data: { passwordHash },
-    });
+    await prisma.$executeRaw`
+      UPDATE "User"
+      SET "passwordHash" = ${passwordHash}
+      WHERE id = ${id}
+    `;
 
     res.json({ message: "Password updated" });
   } catch (err) {
@@ -199,17 +258,26 @@ router.patch("/users/:id/password", async (req, res) => {
   }
 });
 
-
 router.delete("/users/:id", async (req, res) => {
   try {
     const id = Number(req.params.id);
 
-    const user = await prisma.user.findUnique({ where: { id } });
+    const userRows = await prisma.$queryRaw`
+      SELECT *
+      FROM "User"
+      WHERE id = ${id}
+      LIMIT 1
+    `;
+    const user = userRows[0];
+
     if (!user || user.role === "ADMIN") {
       return res.status(404).json({ message: "User not found" });
     }
 
-    await prisma.user.delete({ where: { id } });
+    await prisma.$executeRaw`
+      DELETE FROM "User"
+      WHERE id = ${id}
+    `;
 
     res.json({ message: "User deleted" });
   } catch (err) {

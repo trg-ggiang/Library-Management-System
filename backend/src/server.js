@@ -7,7 +7,7 @@ import adminDashboardRoute from "./routes/Admin/adminDashboard.js";
 import readerDashboardRoutes from "./routes/Reader/readerDashboardRoutes.js";
 import adminBooksRoutes from "./routes/Admin/adminBooks.js";
 import adminUsersRoutes from "./routes/Admin/adminUsers.js";   
-
+import adminStatisticsRoutes from "./routes/Admin/adminStatistics.js";
 import { verifyToken, allowRoles } from "./middleware/authMiddleware.js";
 
 dotenv.config();
@@ -19,20 +19,16 @@ app.use(express.json());
 
 app.get("/", (req, res) => res.send("📚 Library API is running 🚀"));
 
-// auth (không cần token)
 app.use("/api/auth", authRoutes);
 
-// dashboard (cần token)
-app.use("/api/dashboard", verifyToken, adminDashboardRoute);
+app.use("/api/admin", verifyToken, adminDashboardRoute);
+app.use("/api/admin",verifyToken,adminBooksRoutes);
+app.use("/api/admin",verifyToken,adminUsersRoutes);
+app.use("/api/admin",verifyToken, adminStatisticsRoutes);
+
 app.use("/api/dashboard", verifyToken, readerDashboardRoutes);
 
-// admin quản lý sách (ADMIN + LIBRARIAN)
-app.use("/api/admin",verifyToken,adminBooksRoutes);
 
-// admin quản lý user (CHỈ ADMIN)
-app.use("/api/admin",verifyToken,adminUsersRoutes);
-
-// 404 cuối cùng
 app.use((req, res) => {
   res.status(404).json({ message: "Not Found", path: req.originalUrl });
 });

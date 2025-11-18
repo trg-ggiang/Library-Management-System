@@ -5,26 +5,28 @@ const router = express.Router();
 
 router.get("/books", async (req, res) => {
   try {
-    const books = await prisma.book.findMany({
-      include: {
-        copies: true,
-      },
-      orderBy: { id: "desc" },
-    });
+    const rows = await prisma.$queryRaw`
+      SELECT 
+        b.id,
+        b.title,
+        b.author,
+        b.genre,
+        COUNT(c.id) AS "totalCopies",
+        COUNT(CASE WHEN c.status = 0 THEN 1 END) AS "availableCopies"
+      FROM "Book" b
+      LEFT JOIN "BookCopy" c ON c."bookId" = b.id
+      GROUP BY b.id, b.title, b.author, b.genre
+      ORDER BY b.id DESC
+    `;
 
-    const mapped = books.map((b) => {
-      const totalCopies = b.copies.length;
-      const availableCopies = b.copies.filter((c) => c.status === 0).length; 
-
-      return {
-        id: b.id,
-        title: b.title,
-        author: b.author,
-        genre: b.genre,
-        totalCopies,
-        availableCopies,
-      };
-    });
+    const mapped = rows.map((r) => ({
+      id: r.id,
+      title: r.title,
+      author: r.author,
+      genre: r.genre,
+      totalCopies: Number(r.totalCopies),
+      availableCopies: Number(r.availableCopies),
+    }));
 
     return res.json(mapped);
   } catch (error) {
@@ -32,7 +34,6 @@ router.get("/books", async (req, res) => {
     return res.status(500).json({ message: "Failed to load books" });
   }
 });
-
 
 router.post("/books", async (req, res) => {
   const { title, author, category, totalCopies } = req.body;
@@ -47,44 +48,43 @@ router.post("/books", async (req, res) => {
       return res.status(400).json({ message: "Invalid totalCopies" });
     }
 
-    const newBook = await prisma.book.create({
-      data: {
-        title,
-        author,
-        genre: category,      
-        language: "English",
-        publishedYear: 2020,
-        description: "",
-        location: "Shelf-A",
-      },
+    const result = await prisma.$transaction(async (tx) => {
+      const insertedBooks = await tx.$queryRaw`
+        INSERT INTO "Book"
+          ("title", "author", "genre", "language", "publishedYear", "description", "location")
+        VALUES
+          (${title}, ${author}, ${category}, ${"English"}, ${2020}, ${""}, ${"Shelf-A"})
+        RETURNING *
+      `;
+      const newBook = insertedBooks[0];
+
+      await tx.$executeRaw`
+        INSERT INTO "BookCopy" ("bookId", "status")
+        SELECT ${newBook.id}, 0
+        FROM generate_series(1, ${total})
+      `;
+
+      const copies = await tx.$queryRaw`
+        SELECT id, status
+        FROM "BookCopy"
+        WHERE "bookId" = ${newBook.id}
+      `;
+
+      return {
+        id: newBook.id,
+        title: newBook.title,
+        author: newBook.author,
+        genre: newBook.genre,
+        totalCopies: copies.length,
+        availableCopies: copies.filter((c) => c.status === 0).length,
+      };
     });
-    const copiesData = Array.from({ length: total }).map(() => ({
-      bookId: newBook.id,
-      status: 0,
-    }));
 
-    await prisma.bookCopy.createMany({
-      data: copiesData,
-    });
-
-    const createdCopies = await prisma.bookCopy.findMany({
-      where: { bookId: newBook.id },
-    });
-
-    const mapped = {
-      id: newBook.id,
-      title: newBook.title,
-      author: newBook.author,
-      genre: newBook.genre,
-      totalCopies: createdCopies.length,
-      availableCopies: createdCopies.filter((c) => c.status === 0).length,
-    };
-
-    return res.status(201).json(mapped);
+    return res.status(201).json(result);
   } catch (error) {
     console.error("Error in POST /api/admin/books:", error);
 
-    if (error.code === "P2002") {
+    if (error.code === "23505") {
       return res.status(400).json({ message: "Book already exists" });
     }
 
@@ -100,53 +100,62 @@ router.delete("/books/:id", async (req, res) => {
       return res.status(400).json({ message: "Invalid id" });
     }
 
-    const copies = await prisma.bookCopy.findMany({
-      where: { bookId: id },
-      select: { id: true },
-    });
-    const copyIds = copies.map((c) => c.id);
-    const borrowings = await prisma.borrowing.findMany({
-      where: {
-        OR: [
-          { bookId: id },
-          { copyId: { in: copyIds } },
-        ],
-      },
-      select: { id: true },
-    });
-    const borrowingIds = borrowings.map((b) => b.id);
+    await prisma.$transaction(async (tx) => {
+      const copies = await tx.$queryRaw`
+        SELECT id
+        FROM "BookCopy"
+        WHERE "bookId" = ${id}
+      `;
+      const copyIds = copies.map((c) => c.id);
 
-    if (borrowingIds.length > 0) {
-      await prisma.fine.deleteMany({
-        where: {
-          borrowingId: { in: borrowingIds },
-        },
-      });
-    }
+      const borrowings = await tx.$queryRaw`
+        SELECT id
+        FROM "Borrowing"
+        WHERE "bookId" = ${id}
+           OR "copyId" = ANY(${copyIds}::int[])
+      `;
+      const borrowingIds = borrowings.map((b) => b.id);
 
-    await prisma.reservation.deleteMany({
-      where: {
-        OR: [
-          { bookId: id },
-          { bookCopyId: { in: copyIds } },
-        ],
-      },
-    });
-    await prisma.borrowing.deleteMany({
-      where: {
-        OR: [
-          { bookId: id },
-          { copyId: { in: copyIds } },
-        ],
-      },
-    });
+      if (borrowingIds.length > 0) {
+        await tx.$executeRaw`
+          DELETE FROM "Fine"
+          WHERE "borrowingId" = ANY(${borrowingIds}::int[])
+        `;
+      }
 
-    await prisma.bookCopy.deleteMany({
-      where: { bookId: id },
-    });
+      if (copyIds.length > 0) {
+        await tx.$executeRaw`
+          DELETE FROM "Reservation"
+          WHERE "bookId" = ${id}
+             OR "bookCopyId" = ANY(${copyIds}::int[])
+        `;
 
-    await prisma.book.delete({
-      where: { id },
+        await tx.$executeRaw`
+          DELETE FROM "Borrowing"
+          WHERE "bookId" = ${id}
+             OR "copyId" = ANY(${copyIds}::int[])
+        `;
+
+        await tx.$executeRaw`
+          DELETE FROM "BookCopy"
+          WHERE "bookId" = ${id}
+        `;
+      } else {
+        await tx.$executeRaw`
+          DELETE FROM "Reservation"
+          WHERE "bookId" = ${id}
+        `;
+
+        await tx.$executeRaw`
+          DELETE FROM "Borrowing"
+          WHERE "bookId" = ${id}
+        `;
+      }
+
+      await tx.$executeRaw`
+        DELETE FROM "Book"
+        WHERE id = ${id}
+      `;
     });
 
     return res.status(204).send();

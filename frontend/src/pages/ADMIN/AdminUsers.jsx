@@ -181,8 +181,6 @@ export default function AdminUsers() {
         <SideBar />
         <div className="mainContainer">
           <h2 className="admin-title">User Management</h2>
-
-          {/* TOP BAR: Search + Form tạo / sửa tài khoản */}
           <div className="admin-topbar admin-users-topbar">
             <input
               type="text"
