@@ -1,49 +1,32 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
 
-/* =========================
-   THEME / RESET
-========================= */
 :root {
-  --font-sans: "Inter", "Poppins", system-ui, -apple-system, Segoe UI, Roboto,
-    Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-
-  /* ===== PAPER + WOOD (neutral-brown) ===== */
-  --bg-0: #f6f3ee; /* nền giấy hơi ấm */
+  --font-sans: "Inter", "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji",
+    "Segoe UI Emoji";
+  --bg-0: #f6f3ee;
   --bg-1: rgba(74, 59, 50, 0.06);
   --bg-2: rgba(74, 59, 50, 0.09);
-
   --surface: rgba(255, 252, 248, 0.86);
   --card: rgba(255, 255, 255, 0.94);
-
-  --text: #2b211c; /* đen pha nâu */
-  --muted: #6b5d54; /* xám nâu */
+  --text: #2b211c;
+  --muted: #6b5d54;
   --muted-2: #9a8c82;
-
   --border: rgba(74, 59, 50, 0.16);
   --border-2: rgba(74, 59, 50, 0.24);
-
-  /* gỗ óc chó / cafe */
   --primary: #4a3b32;
   --primary-2: #3a2e27;
-
-  /* gỗ sồi / da bò (accent) */
   --secondary: #c19a6b;
-
-  /* accent phụ */
-  --success: #3f6b4f; /* xanh rêu trầm */
-  --danger: #b42318; /* đỏ trầm */
-  --warning: #b98948; /* amber muted */
-
+  --success: #3f6b4f;
+  --danger: #b42318;
+  --warning: #b98948;
   --radius-xl: 28px;
   --radius-lg: 22px;
   --radius-md: 16px;
   --radius-sm: 12px;
-
   --shadow-sm: 0 10px 26px rgba(43, 33, 28, 0.07);
-  --shadow-md: 0 18px 50px rgba(43, 33, 28, 0.10);
+  --shadow-md: 0 18px 50px rgba(43, 33, 28, 0.1);
   --shadow-lg: 0 26px 80px rgba(43, 33, 28, 0.14);
-
   --ring: 0 0 0 4px rgba(193, 154, 107, 0.24);
 }
 
@@ -84,8 +67,8 @@ button {
 }
 
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 0px;
+  height: 0px;
 }
 ::-webkit-scrollbar-thumb {
   background: rgba(193, 154, 107, 0.55);
@@ -95,7 +78,6 @@ button {
   background: transparent;
 }
 
-/* small utilities */
 .truncate-1 {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -114,9 +96,6 @@ button {
   overflow: hidden;
 }
 
-/* =========================
-   APP SHELL
-========================= */
 .appMain {
   position: fixed;
   inset: 16px;
@@ -124,10 +103,8 @@ button {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-
-  background:
-    radial-gradient(1100px 650px at 15% 0%, rgba(193, 154, 107, 0.18), transparent 60%),
-    radial-gradient(900px 600px at 85% 0%, rgba(74, 59, 50, 0.10), transparent 55%),
+  background: radial-gradient(1100px 650px at 15% 0%, rgba(193, 154, 107, 0.18), transparent 60%),
+    radial-gradient(900px 600px at 85% 0%, rgba(74, 59, 50, 0.1), transparent 55%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(246, 243, 238, 0.92));
   box-shadow: var(--shadow-lg);
   border: 1px solid var(--border);
@@ -140,19 +117,18 @@ button {
   }
 }
 
-/* ===== Header: sáng + viền nâu nhẹ ===== */
 header {
   height: 68px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 18px;
-
   background: rgba(255, 252, 248, 0.78);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-
   border-bottom: 1px solid var(--border);
+  position: relative;
+  z-index: 30;
 }
 
 .header .user,
@@ -197,25 +173,21 @@ header .user-account:hover {
   display: flex;
   gap: 14px;
   padding: 14px;
+  align-items: stretch;
 }
 
-/* =========================
-   SIDEBAR
-========================= */
 .sidebar {
   width: 260px;
   flex-shrink: 0;
   border-radius: var(--radius-lg);
   padding: 12px;
-
   background: rgba(255, 252, 248, 0.78);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-
   border: 1px solid var(--border);
   box-shadow: var(--shadow-sm);
-
   display: flex;
+  min-height: 0;
 }
 
 .sidebar ul {
@@ -223,7 +195,6 @@ header .user-account:hover {
   padding: 0;
   margin: 0;
   width: 100%;
-
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -240,11 +211,9 @@ header .user-account:hover {
   gap: 12px;
   padding: 12px 12px;
   border-radius: 16px;
-
   color: var(--text);
   font-weight: 700;
   letter-spacing: 0.01em;
-
   background: transparent;
   border: 1px solid transparent;
   transition: background 0.2s ease, transform 0.15s ease, border-color 0.2s ease;
@@ -264,9 +233,8 @@ header .user-account:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-
   background: rgba(74, 59, 50, 0.06);
-  border: 1px solid rgba(74, 59, 50, 0.10);
+  border: 1px solid rgba(74, 59, 50, 0.1);
   color: var(--primary);
   transition: background 0.2s ease, transform 0.15s ease;
 }
@@ -302,7 +270,7 @@ header .user-account:hover {
   background: var(--primary);
   color: #fff;
   transform: scale(1.02);
-  border-color: rgba(255, 255, 255, 0.10);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 @media (max-width: 980px) {
@@ -322,30 +290,31 @@ header .user-account:hover {
   }
 }
 
-/* =========================
-   MAIN CONTENT
-========================= */
+.sidebar.collapsed {
+  width: 88px;
+}
+.sidebar.collapsed .label {
+  display: none;
+}
+.sidebar.collapsed .menu-item {
+  justify-content: center;
+}
+
 .mainContent {
   flex: 1;
   min-width: 0;
+  min-height: 0;
   overflow: auto;
-
   border-radius: var(--radius-lg);
   padding: 18px;
-
   background: rgba(255, 252, 248, 0.86);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-
   border: 1px solid var(--border);
   box-shadow: var(--shadow-md);
-
   display: block;
 }
 
-/* =========================
-   DASHBOARD
-========================= */
 .dashboard {
   width: 100%;
   max-width: 1200px;
@@ -387,11 +356,9 @@ header .user-account:hover {
   box-shadow: var(--shadow-sm);
   padding: 14px 16px;
   min-height: 88px;
-
   display: flex;
   align-items: center;
   gap: 12px;
-
   transition: transform 0.15s ease, box-shadow 0.2s ease;
 }
 
@@ -438,7 +405,6 @@ header .user-account:hover {
   color: var(--primary);
 }
 
-/* charts */
 .charts {
   display: grid;
   grid-template-columns: 2fr 1fr;
@@ -500,6 +466,7 @@ header .user-account:hover {
   color: var(--muted);
   font-weight: 700;
 }
+
 .legend-dot {
   width: 10px;
   height: 10px;
@@ -507,7 +474,6 @@ header .user-account:hover {
   display: inline-block;
 }
 
-/* dashboard generic button */
 .dashboard button {
   border-radius: 999px;
   border: 1px solid rgba(141, 64, 64, 0.25);
@@ -522,9 +488,6 @@ header .user-account:hover {
   transform: translateY(-1px);
 }
 
-/* =========================
-   READER SHOP (Browse Books)
-========================= */
 .reader-shop {
   width: 100%;
   max-width: 1200px;
@@ -572,7 +535,6 @@ header .user-account:hover {
   outline: none;
 }
 
-/* input focus ring nâu */
 .admin-search:focus,
 .admin-add-form input:focus,
 .admin-add-form select:focus,
@@ -586,7 +548,7 @@ header .user-account:hover {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 14px;
-  align-items: stretch; /* quan trọng để card trong cùng hàng cao đều */
+  align-items: stretch;
 }
 
 .book-card {
@@ -595,11 +557,9 @@ header .user-account:hover {
   border-radius: 18px;
   overflow: hidden;
   box-shadow: var(--shadow-sm);
-
   display: flex;
   flex-direction: column;
   height: 100%;
-
   transition: transform 0.15s ease, box-shadow 0.2s ease;
 }
 
@@ -623,53 +583,43 @@ header .user-account:hover {
   flex: 1;
 }
 
-/* Title: 2 dòng cố định */
 .book-title {
   margin: 0;
   font-weight: 900;
   color: var(--text);
   font-size: 0.98rem;
   line-height: 1.25rem;
-
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-
   min-height: calc(1.25rem * 2);
 }
 
-/* Meta: cho phép 2 dòng (đề phòng thiếu field/author dài) */
 .book-meta {
   font-size: 0.85rem;
   color: var(--muted);
   margin: 0;
   line-height: 1.1rem;
-
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-
   min-height: calc(1.1rem * 2);
 }
 
-/* Desc: 2 dòng cố định để không đẩy nút */
 .book-desc {
   font-size: 0.88rem;
   color: rgba(62, 39, 35, 0.88);
   margin: 0;
   line-height: 1.2rem;
-
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-
   min-height: calc(1.2rem * 2);
 }
 
-/* ===== FIX NÚT: luôn ở đáy + ngang bằng nhau ===== */
 .book-actions {
   margin-top: auto;
   display: grid;
@@ -678,24 +628,19 @@ header .user-account:hover {
   align-items: stretch;
 }
 
-/* Button chung: cùng chiều cao + canh giữa */
 .btn {
   border: none;
   cursor: pointer;
   border-radius: 999px;
-
   height: 40px;
   padding: 0 14px;
-
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-
   font-weight: 900;
   font-size: 0.9rem;
   line-height: 1;
-
   transition: transform 0.15s ease, filter 0.2s ease;
 }
 
@@ -703,7 +648,6 @@ header .user-account:hover {
   transform: translateY(1px);
 }
 
-/* ===== Palette chuẩn wood + trung tính hơn ===== */
 .btn-detail {
   background: linear-gradient(135deg, var(--primary), var(--primary-2));
   color: rgba(255, 254, 250, 0.96);
@@ -713,8 +657,6 @@ header .user-account:hover {
   filter: brightness(1.03);
 }
 
-/* Nút giỏ: chuyển sang “oak/caramel” (gỗ) để hợp tone,
-   không dùng xanh lá quá mạnh nữa */
 .btn-cart {
   background: linear-gradient(135deg, #c19a6b, #b98948);
   color: var(--primary);
@@ -746,18 +688,13 @@ header .user-account:hover {
   border-color: rgba(74, 59, 50, 0.35);
 }
 
-/* =========================
-   AUTH PAGE
-========================= */
 .auth-page {
   margin: 0;
   padding: 0;
   min-height: 100vh;
   width: 100%;
-
   background: url("/library1.png") center/cover no-repeat fixed;
   position: relative;
-
   display: flex;
   justify-content: center;
   align-items: center;
@@ -769,28 +706,20 @@ header .user-account:hover {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(62, 39, 35, 0.52),
-    rgba(62, 39, 35, 0.62)
-  );
+  background: linear-gradient(180deg, rgba(62, 39, 35, 0.52), rgba(62, 39, 35, 0.62));
 }
 
 .auth-page .auth-container {
   position: relative;
   z-index: 1;
-
   width: min(90vw, 380px);
   padding: 26px 26px;
   border-radius: 22px;
-
   background: rgba(255, 254, 250, 0.14);
   border: 1px solid rgba(193, 154, 107, 0.35);
   box-shadow: 0 18px 60px rgba(0, 0, 0, 0.35);
-
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-
   animation: fadeIn 0.6s ease;
 }
 
@@ -804,13 +733,11 @@ header .user-account:hover {
   display: flex;
   align-items: center;
   gap: 10px;
-
   margin-bottom: 14px;
   padding: 10px 14px;
   border-radius: 999px;
-
   background: rgba(255, 254, 250, 0.12);
-  border: 1px solid rgba(193, 154, 107, 0.30);
+  border: 1px solid rgba(193, 154, 107, 0.3);
   transition: background 0.25s ease, border-color 0.25s ease;
 }
 
@@ -898,22 +825,27 @@ header .user-account:hover {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(14px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* =========================
-   ADMIN / LIBRARIAN CONTAINERS
-========================= */
 .mainContainer,
 .admin-container {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-
   padding: 18px 18px 22px;
   border-radius: 22px;
-
   background: var(--surface);
   border: 1px solid rgba(193, 154, 107, 0.22);
   box-shadow: var(--shadow-md);
@@ -947,7 +879,7 @@ header .user-account:hover {
   display: grid;
   gap: 10px;
   align-items: center;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .admin-add-form input,
@@ -987,7 +919,6 @@ header .user-account:hover {
   margin-bottom: 10px;
 }
 
-/* table */
 .admin-table-wrapper {
   width: 100%;
   max-height: 520px;
@@ -1064,13 +995,12 @@ header .user-account:hover {
 .admin-btn-cancel {
   padding: 9px 14px;
   border-radius: 999px;
-  border: 1px solid rgba(193, 154, 107, 0.30);
+  border: 1px solid rgba(193, 154, 107, 0.3);
   background: rgba(255, 254, 250, 0.86);
   color: var(--text);
   font-weight: 900;
 }
 
-/* modal */
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -1082,10 +1012,11 @@ header .user-account:hover {
 }
 
 .modal {
+  position: relative;
   background: rgba(255, 254, 250, 0.96);
   border-radius: 18px;
   padding: 16px 18px;
-  width: min(92vw, 460px);
+  width: min(92vw, 700px);
   box-shadow: 0 26px 80px rgba(74, 59, 50, 0.35);
   border: 1px solid rgba(193, 154, 107, 0.22);
 }
@@ -1128,11 +1059,11 @@ header .user-account:hover {
   color: rgba(255, 254, 250, 0.96);
   background: linear-gradient(135deg, var(--primary), var(--primary-2));
 }
+
 .modal .btn-secondary {
   background: rgba(141, 64, 64, 0.92);
 }
 
-/* librarian borrow */
 .librarian-main {
   width: 100%;
 }
@@ -1180,7 +1111,6 @@ header .user-account:hover {
   transform: translateY(-1px);
 }
 
-/* responsive forms */
 @media (max-width: 980px) {
   .admin-add-form {
     grid-template-columns: 1fr 1fr;
@@ -1191,3 +1121,361 @@ header .user-account:hover {
     grid-template-columns: 1fr;
   }
 }
+
+.profile-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.profile-msg {
+  margin: 8px 0 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(229, 231, 235, 1);
+  font-weight: 800;
+}
+.profile-msg.ok {
+  background: rgba(34, 197, 94, 0.1);
+}
+.profile-msg.err {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.profile-card {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 14px;
+  background: white;
+  border-radius: 18px;
+  border: 1px solid rgba(229, 231, 235, 1);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.profile-left {
+  padding: 16px;
+  background: linear-gradient(180deg, rgba(248, 250, 252, 1), rgba(255, 255, 255, 1));
+  border-right: 1px solid rgba(229, 231, 235, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.profile-avatar {
+  width: 100%;
+  height: 260px;
+  border-radius: 16px;
+  border: 1px solid rgba(229, 231, 235, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-avatar-inner {
+  width: 120px;
+  height: 120px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  font-weight: 900;
+  background: rgba(15, 23, 42, 0.12);
+  border: 1px solid rgba(229, 231, 235, 1);
+}
+
+.profile-left-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.profile-name {
+  font-size: 22px;
+  font-weight: 900;
+  color: rgb(15, 23, 42);
+}
+
+.profile-sub {
+  color: rgb(100, 116, 139);
+  font-weight: 700;
+  word-break: break-all;
+}
+
+.profile-mini {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.profile-mini-item {
+  border: 1px solid rgba(229, 231, 235, 1);
+  border-radius: 14px;
+  padding: 10px;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profile-mini-item .k {
+  font-size: 12px;
+  font-weight: 900;
+  color: rgb(100, 116, 139);
+}
+
+.profile-mini-item .v {
+  font-weight: 900;
+  color: rgb(15, 23, 42);
+}
+
+.profile-right {
+  padding: 16px;
+}
+
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.profile-field-wide {
+  grid-column: 1 / -1;
+}
+
+.profile-field label {
+  font-weight: 900;
+  color: rgb(51, 65, 85);
+  font-size: 13px;
+}
+
+.profile-field input,
+.profile-field select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.85);
+  outline: none;
+  background: white;
+}
+
+.profile-field input:focus,
+.profile-field select:focus {
+  border-color: rgba(100, 116, 139, 1);
+}
+
+.profile-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 6px;
+}
+
+@media (max-width: 920px) {
+  .profile-card {
+    grid-template-columns: 1fr;
+  }
+  .profile-left {
+    border-right: none;
+    border-bottom: 1px solid rgba(229, 231, 235, 1);
+  }
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.borrow-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.borrow-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.borrow-actions .shop-select {
+  min-width: 220px;
+}
+
+.borrow-table-card {
+  background: #fff;
+  border-radius: 18px;
+  border: 1px solid rgba(229, 231, 235, 1);
+  overflow: hidden;
+}
+
+.borrow-table-wrap {
+  width: 100%;
+  overflow: auto;
+}
+
+.borrow-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.borrow-table th {
+  text-align: left;
+  padding: 12px;
+  background: rgba(248, 250, 252, 1);
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.borrow-table td {
+  padding: 12px;
+  border-top: 1px solid rgba(229, 231, 235, 1);
+  white-space: nowrap;
+}
+
+.borrow-table tr:hover {
+  background: rgba(248, 250, 252, 0.7);
+}
+
+.borrow-badge {
+  display: inline-flex;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: 12px;
+  border: 1px solid rgba(229, 231, 235, 1);
+}
+
+.borrow-badge.active {
+  background: rgba(34, 197, 94, 0.12);
+}
+
+.borrow-badge.done {
+  background: rgba(100, 116, 139, 0.12);
+}
+
+.userMenu {
+  position: relative;
+}
+
+.userDropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  width: 220px;
+  background: white;
+  border: 1px solid rgba(229, 231, 235, 1);
+  border-radius: 14px;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.14);
+  overflow: hidden;
+  z-index: 50;
+}
+
+.userDropdownHeader {
+  padding: 12px;
+  border-bottom: 1px solid rgba(229, 231, 235, 1);
+}
+
+.userDropdownItem {
+  width: 100%;
+  text-align: left;
+  padding: 12px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+}
+
+.userDropdownItem:hover {
+  background: rgba(248, 250, 252, 1);
+}
+
+.userDropdownItem.danger {
+  color: #b91c1c;
+}
+
+.userDropdownItem.danger:hover {
+  background: rgba(254, 242, 242, 1);
+}
+.mainContent{
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position:absolute;
+}
+
+.mainContainer,
+.admin-container,
+.reader-shop{
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-table-wrapper{
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  overflow: auto;
+}
+
+.admin-table{
+  width: 100%;
+}
+
+.borrow-table-wrap{
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+.admin-topbar,
+.admin-users-topbar{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.admin-topbar .admin-search,
+.admin-users-topbar .admin-search{
+  flex: 1;
+  min-width: 260px;
+  max-width: 560px;
+}
+
+.admin-topbar .page-btn,
+.admin-users-topbar .page-btn{
+  white-space: nowrap;
+}
+

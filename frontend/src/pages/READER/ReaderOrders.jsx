@@ -43,7 +43,6 @@ export default function ReaderOrders() {
               <Link to="/reader/books" className="page-btn" style={{ textDecoration: "none" }}>
                 ← Shop sách
               </Link>
-              <button className="page-btn" onClick={fetchOrders}>Refresh</button>
             </div>
 
             <h2 style={{ marginTop: 0 }}>Đơn mượn của tôi</h2>

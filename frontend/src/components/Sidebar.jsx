@@ -3,12 +3,14 @@ import {
   FaHome, FaUsers, FaBook, FaMoneyBillWave, FaCalendarAlt,
   FaClipboardList, FaChartBar, FaUserCog
 } from "react-icons/fa";
-import authStore from "../store/useAuthStore";
+import useAuthStore from "../store/useAuthStore";
+import useUIStore from "../store/useUIStore";
 
 export default function SideBar() {
   const location = useLocation();
-  const { user } = authStore();
+  const { user } = useAuthStore();
   const role = user?.role || "READER";
+  const collapsed = useUIStore((s) => s.sidebarCollapsed);
 
   const adminMenu = [
     { icon: FaHome,  label: "Dashboard",       path: "/admin/dashboard" },
@@ -47,17 +49,17 @@ export default function SideBar() {
     readerMenu;
 
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar ${collapsed ? "collapsed" : ""}`}>
       <ul>
         {menuItems.map((item, index) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
           return (
             <li key={index}>
-              <Link to={item.path} className={isActive ? "active" : ""}>
+              <Link to={item.path} className={isActive ? "active" : ""} title={collapsed ? item.label : ""}>
                 <div className="menu-item">
                   <span className="icon"><Icon size={20} /></span>
-                  <span className="label">{item.label}</span>
+                  {!collapsed && <span className="label">{item.label}</span>}
                 </div>
               </Link>
             </li>
