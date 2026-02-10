@@ -27,16 +27,13 @@ export function verifyToken(req, res, next) {
 
 export function allowRoles(roles = []) {
   return (req, res, next) => {
-    const role = req.user?.role;
+    const role = String(req.user?.role || "").toUpperCase();
+    if (!role) return res.status(401).json({ message: "Chua dang nhap" });
 
-    if (!role) {
-      return res.status(401).json({ message: "Chua dang nhap" });
-    }
-
-    if (!roles.includes(role)) {
+    const allowed = roles.map((r) => String(r).toUpperCase());
+    if (!allowed.includes(role)) {
       return res.status(403).json({ message: "Khong co quyen truy cap" });
     }
-
     next();
   };
 }

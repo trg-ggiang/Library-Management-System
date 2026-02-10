@@ -195,9 +195,7 @@ export default function AdminStatistics() {
             </div>
           </div>
 
-          {/* GRID */}
           <div className="admin-stats-grid">
-            {/* --- BAR CHART --- */}
             <section className="admin-stats-card admin-stats-card-large">
               <div className="admin-stats-card-header">
                 <h3>New readers per month</h3>
@@ -217,7 +215,6 @@ export default function AdminStatistics() {
               </div>
             </section>
 
-            {/* --- DOUGHNUT CHART --- */}
             <section className="admin-stats-card admin-stats-card-medium">
               <div className="admin-stats-card-header">
                 <h3>Books by genre</h3>
@@ -235,7 +232,6 @@ export default function AdminStatistics() {
               </div>
             </section>
 
-            {/* --- MOST BORROWED --- */}
             <section className="admin-stats-card admin-stats-card-full">
               <div className="admin-stats-card-header">
                 <h3>Most borrowed books</h3>

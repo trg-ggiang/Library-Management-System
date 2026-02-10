@@ -2,6 +2,10 @@ import { useEffect, useState } from "react";
 import api from "../../lib/axios";
 import Header from "../../components/Header";
 import SideBar from "../../components/SideBar";
+import { FaTrash } from "react-icons/fa";
+
+
+
 
 
 export default function AdminBrowseBooks() {
@@ -197,7 +201,7 @@ export default function AdminBrowseBooks() {
                           className="admin-btn-delete"
                           onClick={() => handleDeleteBook(b.id)}
                         >
-                          x
+                           <FaTrash size={14} />
                         </button>
                       </td>
                     </tr>

@@ -37,16 +37,18 @@ model User {
 }
 
 model ReaderProfile {
-  id               Int      @id @default(autoincrement())
-  userId           Int      @unique
-  address          String   @db.VarChar(255)
+  id               Int       @id @default(autoincrement())
+  userId           Int       @unique
+  address          String    @db.VarChar(255)
   dob              DateTime?
-  gender           Gender   @default(FEMALE)
-  registrationDate DateTime @default(now())
+  gender           Gender    @default(FEMALE)
+  registrationDate DateTime  @default(now())
 
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   borrowings   Borrowing[]   @relation("ReaderBorrowings")
   reservations Reservation[]
+  reviews      Review[]
+  orders       BorrowOrder[]
 }
 
 model Book {
@@ -65,21 +67,23 @@ model Book {
   copies       BookCopy[]
   borrowings   Borrowing[]
   reservations Reservation[]
+  reviews      Review[]
+  orderItems   BorrowOrderItem[]
 
   @@unique([title, author, publishedYear])
   @@index([title, author, genre])
 }
 
 model BookCopy {
-  id        Int      @id @default(autoincrement())
-  bookId    Int
+  id     Int @id @default(autoincrement())
+  bookId Int
 
   /// 0 = AVAILABLE
   /// 1 = RESERVED
   /// 2 = BORROWED
   /// 3 = LOST
   /// 4 = DAMAGED
-  status    Int      @default(0)
+  status Int @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -92,61 +96,138 @@ model BookCopy {
 }
 
 model Borrowing {
-  id         Int      @id @default(autoincrement())
+  id         Int       @id @default(autoincrement())
   readerId   Int
   copyId     Int
   staffId    Int?
-  borrowDate DateTime @default(now())
+  borrowDate DateTime  @default(now())
   dueDate    DateTime
   returnDate DateTime?
 
   /// 1 = BORROWED
   /// 2 = RETURNED
-  status     Int      @default(1)
+  status Int @default(1)
 
   reader ReaderProfile @relation("ReaderBorrowings", fields: [readerId], references: [id])
   copy   BookCopy      @relation(fields: [copyId], references: [id])
   staff  User?         @relation("StaffBorrowings", fields: [staffId], references: [id])
   fines  Fine[]
 
-  book   Book?         @relation(fields: [bookId], references: [id])
+  book   Book? @relation(fields: [bookId], references: [id])
   bookId Int?
+
+  order   BorrowOrder? @relation(fields: [orderId], references: [id])
+  orderId Int?
 
   @@index([readerId, copyId])
   @@index([dueDate])
 }
 
 model Reservation {
-  id         Int      @id @default(autoincrement())
-  readerId   Int
-  bookId     Int
-  reservedAt DateTime @default(now())
-  expiresAt  DateTime?
+  id        Int      @id @default(autoincrement())
+  readerId  Int
+  bookId    Int
+  copyId    Int
+  status    Int      @default(1) // 1=ACTIVE,2=CANCELLED,3=EXPIRED,4=FULFILLED
+  createdAt DateTime @default(now())
+  expiresAt DateTime
 
-  /// 1 = ACTIVE
-  /// 2 = NOTIFIED
-  /// 3 = FULFILLED
-  /// 4 = CANCELLED
-  /// 5 = EXPIRED
-  status     Int      @default(1)
+  reader ReaderProfile @relation(fields: [readerId], references: [id])
+  book   Book         @relation(fields: [bookId], references: [id])
+  copy   BookCopy     @relation(fields: [copyId], references: [id])
 
-  reader     ReaderProfile @relation(fields: [readerId], references: [id])
-  book       Book          @relation(fields: [bookId], references: [id])
-  bookCopy   BookCopy?     @relation(fields: [bookCopyId], references: [id])
-  bookCopyId Int?
-
-  @@index([readerId, bookId, status])
+  @@index([readerId, status])
+  @@index([copyId, status])
 }
 
+
 model Fine {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   borrowingId Int
-  reason      String   @db.VarChar(255)
-  amount      Decimal  @db.Decimal(10, 2)
-  fineDate    DateTime @default(now())
+  reason      String    @db.VarChar(255)
+  amount      Decimal   @db.Decimal(10, 2)
+  fineDate    DateTime  @default(now())
   paidAt      DateTime?
+  payments    Payment[]
 
   borrowing Borrowing @relation(fields: [borrowingId], references: [id])
 
   @@index([borrowingId])
+}
+
+model BorrowOrder {
+  id              Int       @id @default(autoincrement())
+  readerId        Int
+  loanDays        Int       @default(14)
+  note            String?
+  pickupExpiresAt DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  /// 1=PENDING, 2=APPROVED, 3=BORROWED, 4=CANCELLED, 5=COMPLETED
+  status Int @default(1)
+
+  /// 1=UNPAID, 2=PAID, 3=REFUNDED
+  paymentStatus Int @default(1)
+
+  totalDeposit Decimal @default(0) @db.Decimal(10, 2)
+  totalFee     Decimal @default(0) @db.Decimal(10, 2)
+
+  reader     ReaderProfile     @relation(fields: [readerId], references: [id])
+  items      BorrowOrderItem[]
+  payments   Payment[]
+  borrowings Borrowing[]
+
+  @@index([readerId, status])
+  @@index([createdAt])
+}
+
+model BorrowOrderItem {
+  id       Int @id @default(autoincrement())
+  orderId  Int
+  bookId   Int
+  quantity Int @default(1)
+
+  order BorrowOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  book  Book        @relation(fields: [bookId], references: [id])
+
+  @@unique([orderId, bookId])
+  @@index([bookId])
+}
+
+model Payment {
+  id      Int     @id @default(autoincrement())
+  orderId Int?
+  fineId  Int?
+  amount  Decimal @db.Decimal(10, 2)
+  method  String  @db.VarChar(30)
+
+  /// 1=PENDING, 2=PAID, 3=FAILED, 4=REFUNDED
+  status Int @default(1)
+
+  createdAt DateTime  @default(now())
+  paidAt    DateTime?
+
+  order BorrowOrder? @relation(fields: [orderId], references: [id])
+  fine  Fine?        @relation(fields: [fineId], references: [id])
+
+  @@index([orderId])
+  @@index([fineId])
+  @@index([createdAt])
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  readerId  Int
+  bookId    Int
+  rating    Int
+  comment   String?  @db.VarChar(1000)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reader ReaderProfile @relation(fields: [readerId], references: [id], onDelete: Cascade)
+  book   Book          @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@unique([readerId, bookId])
+  @@index([bookId, rating])
 }

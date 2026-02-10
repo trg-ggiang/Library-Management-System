@@ -1,82 +1,87 @@
 import { useEffect, useState } from "react";
+import Header from "../../components/Header";
+import SideBar from "../../components/SideBar";
 import api from "../../lib/axios";
-import useAuthStore from "../../store/useAuthStore.js";
 
 export default function ReaderDashboard() {
-  const token = useAuthStore((state) => state.token);
-
-  const [profile, setProfile] = useState(null);
+  const [data, setData] = useState(null);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await api.get("/dashboard/reader-overview", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setProfile(res.data);
-      } catch (error) {
-        setError("Failed to load profile", error);
-      }
-    };
-
-    if (token) {
-      fetchProfile();
-    } else {
-      setError("No token found. Please log in again.");
+  const fetchOverview = async () => {
+    try {
+      setError("");
+      const res = await api.get("/dashboard/reader-overview");
+      setData(res.data);
+    } catch (e) {
+      console.error(e);
+      setError("Không tải được dashboard reader.");
     }
-  }, [token]);
+  };
 
-  if (error) {
-    return (
-      <div className="dashboard-page">
-        <p className="error">{error}</p>
-      </div>
-    );
+  useEffect(() => { fetchOverview(); }, []);
+
+  if (!data) {
+    return <div className="mainContent"><p>{error || "Đang tải..."}</p></div>;
   }
 
-  if (!profile) {
-    return (
-      <div className="dashboard-page">
-        <p>Loading...</p>
-      </div>
-    );
-  }
-
-  const rp = profile.readerProfile;
+  const r = data.reader;
+  const s = data.stats;
 
   return (
-    <div className="dashboard-page">
-      <div className="dashboard-container">
-        <h2>Welcome, {profile.name}</h2>
+    <div className="appMain">
+      <Header />
+      <div className="mainContentWrapper">
+        <SideBar />
 
-        <div className="info-box">
-          <h3>Your Information</h3>
-          <p>
-            <strong>Name:</strong> {profile.name}
-          </p>
-          <p>
-            <strong>Email:</strong> {profile.email}
-          </p>
-          <p>
-            <strong>Role:</strong> {profile.role}
-          </p>
-          <p>
-            <strong>Phone:</strong> {profile.phone || "N/A"}
-          </p>
-          <p>
-            <strong>Address:</strong> {rp?.address || "N/A"}
-          </p>
-          <p>
-            <strong>Gender:</strong> {rp?.gender || "N/A"}
-          </p>
-          <p>
-            <strong>Date of birth:</strong> {rp?.dob?.slice(0, 10) || "N/A"}
-          </p>
-          <p>
-            <strong>Registered on:</strong>{" "}
-            {rp?.registrationDate?.slice(0, 10) || "N/A"}
-          </p>
+        <div className="mainContent" style={{ maxWidth: 1100, width: "100%" }}>
+          <h2 style={{ marginTop: 0 }}>Reader Dashboard</h2>
+
+          <div className="top-cards">
+            <div className="card card1"><div className="card-content">
+              <label>Total Borrowings</label><p className="value">{s.totalBorrowings}</p>
+            </div></div>
+            <div className="card card2"><div className="card-content">
+              <label>Active Borrowings</label><p className="value">{s.activeBorrowings}</p>
+            </div></div>
+            <div className="card card3"><div className="card-content">
+              <label>Overdue</label><p className="value">{s.overdueBorrowings}</p>
+            </div></div>
+            <div className="card card4"><div className="card-content">
+              <label>Total Fines</label><p className="value">{s.totalFineAmount.toLocaleString("vi-VN")} VND</p>
+            </div></div>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginTop: 14 }}>
+            <div style={{ background: "white", borderRadius: 18, padding: 14, border: "1px solid rgba(229,231,235,1)" }}>
+              <h3 style={{ marginTop: 0 }}>Thông tin</h3>
+              <p><b>Name:</b> {r.name}</p>
+              <p><b>Email:</b> {r.email}</p>
+              <p><b>Phone:</b> {r.phone || "-"}</p>
+              <p><b>Address:</b> {r.address || "-"}</p>
+              <p><b>Gender:</b> {r.gender || "-"}</p>
+              <p><b>DOB:</b> {r.dob ? String(r.dob).slice(0,10) : "-"}</p>
+            </div>
+
+            <div style={{ background: "white", borderRadius: 18, padding: 14, border: "1px solid rgba(229,231,235,1)" }}>
+              <h3 style={{ marginTop: 0 }}>5 lượt mượn gần nhất</h3>
+              {data.recentBorrowings.length === 0 ? (
+                <p>Chưa có.</p>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {data.recentBorrowings.map((x) => (
+                    <div key={x.id} style={{ border: "1px solid rgba(229,231,235,1)", borderRadius: 14, padding: 10 }}>
+                      <b>{x.bookTitle}</b>
+                      <div style={{ color: "rgb(100,116,139)", marginTop: 4 }}>
+                        Borrow: {new Date(x.borrowDate).toLocaleDateString("vi-VN")} • Due: {new Date(x.dueDate).toLocaleDateString("vi-VN")}
+                        {x.returnDate ? ` • Return: ${new Date(x.returnDate).toLocaleDateString("vi-VN")}` : ""}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
