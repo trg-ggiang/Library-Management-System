@@ -11,11 +11,11 @@ The system supports the complete workflow from **book browsing → cart → chec
 | Category | Technologies |
 |:----------|:-------------|
 | **Frontend** | React, Vite, React Router DOM, Axios |
-| **State Management** | Zustand (persist) |
+| **State Management** | Zustand |
 | **Backend** | Node.js, Express.js |
 | **ORM** | Prisma |
-| **Database** | MySQL / PostgreSQL / SQLite (via `.env`) |
-| **Authentication & Security** | JWT, bcryptjs (depending on your implementation) |
+| **Database** | PostgreSQL |
+| **Authentication & Security** | JWT, bcryptjs |
 | **Development Tools** | Git, GitHub, VS Code |
 
 ---
