@@ -78,12 +78,11 @@ The system supports the complete workflow from **book browsing → cart → chec
 1. **Login**  
    → Access the dashboard based on assigned role permissions.  
    <p align="center">
-      <img src="./docs/demo/staff-dashboard-1.png" width="350" alt="Staff Dashboard 1" />
+      <img src="./docs/demo/staff-dashboard-1.png" width="700" alt="Staff Dashboard 1" />
    </p>
 
 2. **Book Management (optional if implemented)**  
    → Create/update books, upload covers, manage copies.  
-   <p align="center"><img src="./docs/demo/books.png" width="700" alt="Books Management" /></p>
    <p align="center"><img src="./docs/demo/book-detail.png" width="700" alt="Book Detail" /></p>
 
 3. **Borrowing Workflow (Librarian)**  
@@ -116,7 +115,6 @@ The system supports the complete workflow from **book browsing → cart → chec
 3. **Checkout (Borrow Order)**  
    → Choose loan days, note, payment option, then create order.  
    <p align="center"><img src="./docs/demo/reader-checkout1.png" width="700" alt="Reader Checkout" /></p>
-   <p align="center"><img src="./docs/demo/reader-checkout2.png" width="700" alt="Reader Checkout" /></p>
 
 
 4. **My Orders & Borrow History**  
