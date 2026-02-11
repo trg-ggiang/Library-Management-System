@@ -147,7 +147,7 @@ Before starting, make sure you have installed:
 
 | Step | Command |
 |:-----|:---------|
-| Clone the project | `git clone https://github.com/your-username/library-management-system.git` |
+| Clone the project | `git clone https://github.com/trg-ggiang/library-management-system.git` |
 | Move into folder | `cd library-management-system` |
 
 ---
