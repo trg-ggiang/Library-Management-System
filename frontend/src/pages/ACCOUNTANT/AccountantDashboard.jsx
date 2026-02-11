@@ -31,14 +31,20 @@ export default function AccountantDashboard() {
           <h2 style={{ marginTop: 0 }}>Accountant Dashboard</h2>
 
           <div className="top-cards">
+            {/* Card 1: Tổng tiền phạt */}
             <div className="card card1"><div className="card-content">
-              <label>Total Fine Amount</label>
-              <p className="value">{data.totalFineAmount.toLocaleString("vi-VN")} VND</p>
+              <label>Total Fines Issued</label>
+              {/* Đổi sang en-US để hiển thị dấu phẩy (ví dụ: 200,000 VND) */}
+              <p className="value">{data.totalFineAmount.toLocaleString("en-US")} VND</p>
             </div></div>
+
+            {/* Card 2: Tổng tiền đã thu */}
             <div className="card card2"><div className="card-content">
-              <label>Total Paid Amount</label>
-              <p className="value">{data.totalPaidAmount.toLocaleString("vi-VN")} VND</p>
+              <label>Total Collected</label>
+              <p className="value">{data.totalPaidAmount.toLocaleString("en-US")} VND</p>
             </div></div>
+
+            {/* Card 3: Số khoản phạt chưa đóng */}
             <div className="card card3"><div className="card-content">
               <label>Unpaid Fines</label>
               <p className="value">{data.unpaidFinesCount}</p>

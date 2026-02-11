@@ -122,9 +122,7 @@ export default function ReaderCheckout() {
               </button>
             </div>
 
-            <p style={{ marginTop: 10, color: "rgb(100,116,139)" }}>
-              Sau khi tạo đơn, thủ thư sẽ duyệt và phát hành (issue) để chuyển trạng thái sang “Đang mượn”.
-            </p>
+            
           </div>
         </div>
       </div>
